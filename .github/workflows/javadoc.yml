@@ -1,0 +1,35 @@
+name: Publicar Javadoc en GitHub Pages
+
+# 1. ¿Cuándo se ejecuta esto? Solo cuando hagamos push a la rama 'stable'
+on:
+  push:
+    branches:
+      - stable
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 2. Descargamos el código de la rama
+      - name: Descargar código del repositorio
+        uses: actions/checkout@v3
+
+      # 3. Instalamos Java 21 en la máquina virtual
+      - name: Configurar Java 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      # 4. Ejecutamos Maven para generar la web del Javadoc
+      - name: Generar Javadoc con Maven
+        run: mvn clean javadoc:javadoc
+
+      # 5. Subimos la carpeta generada a GitHub Pages
+      - name: Publicar en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./target/site/apidocs
